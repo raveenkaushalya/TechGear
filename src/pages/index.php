@@ -68,10 +68,9 @@
             if (typeof setupProductModal === 'function') {
                 setupProductModal();
             }
-                
-            if (typeof loadProducts === 'function') {
-                loadProducts();
-            }
+            
+            // Note: loadProducts is already called in app.js, so we don't call it here
+            // to avoid duplicate product cards
             
             if (typeof setupStaticProductCards === 'function') {
                 setupStaticProductCards();

@@ -169,8 +169,19 @@ function loadProducts() {
     };
     
     if (document.querySelector(map.featured)) {
-        products.filter(p => p.featured).forEach(p => {
-            document.querySelector(map.featured).appendChild(createProductCard(p));
+        // Clear any existing products first
+        const featuredGrid = document.querySelector(map.featured);
+        featuredGrid.innerHTML = ''; // Remove all current products
+        
+        // Show ONLY one keyboard (k1), the cyberpunk mouse (m1), and one monitor (mn1)
+        const featuredProducts = [
+            products.find(p => p.id === 'k1'), // Keyboard
+            products.find(p => p.id === 'm1'), // Cyberpunk mouse
+            products.find(p => p.id === 'mn1')  // Monitor
+        ];
+        
+        featuredProducts.forEach(p => {
+            if (p) featuredGrid.appendChild(createProductCard(p));
         });
     }
     

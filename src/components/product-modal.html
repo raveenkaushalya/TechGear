@@ -1,0 +1,76 @@
+<!-- Product Modal Component -->
+<div id="product-modal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <div class="modal-product" data-product-id="">
+            <div class="modal-product-image">
+                <img id="modal-product-image" src="" alt="Product Image">
+            </div>
+            <div class="modal-product-details">
+                <h2 id="modal-product-name"></h2>
+                <p id="modal-product-description" class="modal-description"></p>
+                <p id="modal-product-price" class="modal-price"></p>
+                
+                <div class="product-specs">
+                    <h3>Specifications</h3>
+                    <ul>
+                        <li><strong>Brand:</strong> <span>TechGear</span></li>
+                        <li><strong>Model:</strong> <span>Premium Series</span></li>
+                        <li><strong>Warranty:</strong> <span>2 Years</span></li>
+                        <li><strong>Shipping:</strong> <span>Free</span></li>
+                    </ul>
+                </div>
+                
+                <div class="product-actions">
+                    <div class="quantity-selector">
+                        <button class="quantity-btn minus">-</button>
+                        <input type="number" value="1" min="1" max="10" class="quantity-input">
+                        <button class="quantity-btn plus">+</button>
+                    </div>
+                    <button class="btn modal-add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="product-additional-info">
+            <div class="tabs">
+                <div class="tab-header">
+                    <div class="active">Description</div>
+                    <div>Features</div>
+                    <div>Reviews</div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-body active">
+                        <p>This premium product is designed with the highest quality materials to deliver exceptional performance. Perfect for both casual users and professionals who demand the best.</p>
+                        <p>Experience unparalleled quality and performance with our cutting-edge technology and sleek design.</p>
+                    </div>
+                    <div class="tab-body">
+                        <ul>
+                            <li>Premium build quality with durable materials</li>
+                            <li>Ergonomic design for extended comfort</li>
+                            <li>Advanced technology for superior performance</li>
+                            <li>Energy efficient and environmentally friendly</li>
+                            <li>Sleek and modern aesthetic that fits any setup</li>
+                        </ul>
+                    </div>
+                    <div class="tab-body">
+                        <div class="review">
+                            <div class="review-header">
+                                <span class="reviewer">John D.</span>
+                                <div class="stars">★★★★★</div>
+                            </div>
+                            <p>Absolutely love this product! The quality is exceptional and it performs exactly as advertised.</p>
+                        </div>
+                        <div class="review">
+                            <div class="review-header">
+                                <span class="reviewer">Sarah M.</span>
+                                <div class="stars">★★★★☆</div>
+                            </div>
+                            <p>Great product overall. Shipping was quick and the performance is excellent.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

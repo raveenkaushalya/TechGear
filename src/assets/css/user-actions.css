@@ -1,0 +1,34 @@
+/* User actions styling for header */
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.login a, .cart a {
+    color: var(--light-color);
+    transition: color var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.login a:hover, .cart a:hover {
+    color: var(--primary-color);
+}
+
+/* Update responsive styling for the header */
+@media screen and (max-width: 768px) {
+    .user-actions {
+        margin-top: 15px;
+        width: 100%;
+        position: absolute;
+        bottom: 15px;
+        left: 0;
+        justify-content: center;
+    }
+    
+    .cart, .login {
+        text-align: center;
+    }
+}

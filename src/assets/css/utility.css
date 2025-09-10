@@ -1,0 +1,18 @@
+.limited-edition {
+    border: 2px solid var(--primary-color); 
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+.limited-edition-label {
+    color: var(--primary-color);
+    font-size: 14px;
+}
+
+/* Cart page utilities */
+.empty-cart-message {
+    display: none;
+}
+
+.empty-cart-message.active {
+    display: flex;
+}

@@ -246,7 +246,8 @@ nav ul li a.active::after {
 .centered-featured-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 50px;
+    column-gap: 50px;
+    row-gap: 20px;
     max-width: 1000px;
     margin: 0 auto;
     justify-content: center;
@@ -278,7 +279,8 @@ nav ul li a.active::after {
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    /* Using min-height instead of height:100% to allow natural height */
+    min-height: 400px;
 }
 
 .product-card:hover {
@@ -306,7 +308,8 @@ nav ul li a.active::after {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    /* Allow natural content height without forcing expansion */
+    flex: 0 1 auto;
 }
 
 .product-info h3 {

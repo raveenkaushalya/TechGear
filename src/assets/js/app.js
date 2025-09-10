@@ -6,6 +6,7 @@ const products = [
     { id: 'k3', name: 'Compact 60% Keyboard', description: 'Compact 60% Layout Mechanical Keyboard with PBT Keycaps', price: 79.99, image: '../assets/images/k3.jpg', category: 'keyboards' },
     { id: 'k4', name: 'Premium Mechanical Keyboard', description: 'Premium Aluminum Frame Keyboard with Hot-swappable Switches', price: 149.99, image: '../assets/images/k4.jpg', category: 'keyboards' },
     { id: 'k5', name: 'Silent Mechanical Keyboard', description: 'Ultra-quiet Mechanical Keyboard for Office and Gaming', price: 99.99, image: '../assets/images/k5.jpg', category: 'keyboards' },
+    { id: 'k7', name: 'Transformer Edition Keyboard', description: 'Exclusive Autobot-themed Mechanical Keyboard with Custom Keycaps - Perfect for Transformers fans!', price: 149.99, image: '../assets/images/k7-transformer.jpg', category: 'keyboards', featured: true, limited: true },
     { id: 'm1', name: 'Cyberpunk Edition Mouse', description: 'Exclusive Cyberpunk RGB Wireless Gaming Mouse – Only while stocks last!', price: 129.99, image: '../assets/images/m1-cyberpunk.jpg', category: 'mice', featured: true, limited: true },
     { id: 'm2', name: 'Wireless Gaming Mouse', description: 'Ultra-lightweight Wireless Gaming Mouse with 20,000 DPI Sensor', price: 69.99, image: '../assets/images/m2.jpg', category: 'mice' },
     { id: 'm3', name: 'Ergonomic Mouse', description: 'Vertical Ergonomic Mouse for Reduced Wrist Strain', price: 49.99, image: '../assets/images/m3.jpg', category: 'mice' },
@@ -173,15 +174,27 @@ function loadProducts() {
         const featuredGrid = document.querySelector(map.featured);
         featuredGrid.innerHTML = ''; // Remove all current products
         
-        // Show ONLY one keyboard (k1), the cyberpunk mouse (m1), and one monitor (mn1)
+        // Add a special class to the grid for centering
+        featuredGrid.classList.add('centered-featured-grid');
+        
+        // Arrange products with limited edition items in the spotlight
         const featuredProducts = [
-            products.find(p => p.id === 'k1'), // Keyboard
-            products.find(p => p.id === 'm1'), // Cyberpunk mouse
+            products.find(p => p.id === 'k7'), // Transformer Edition Keyboard (Limited Edition)
+            products.find(p => p.id === 'm1'), // Cyberpunk mouse (Limited Edition)
             products.find(p => p.id === 'mn1')  // Monitor
         ];
         
-        featuredProducts.forEach(p => {
-            if (p) featuredGrid.appendChild(createProductCard(p));
+        featuredProducts.forEach((p, index) => {
+            if (!p) return;
+            
+            const card = createProductCard(p);
+            
+            // Add a special highlight class to the limited edition products
+            if (p.id === 'm1' || p.id === 'k7') {
+                card.classList.add('featured-highlight');
+            }
+            
+            featuredGrid.appendChild(card);
         });
     }
     

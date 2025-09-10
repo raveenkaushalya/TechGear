@@ -242,6 +242,16 @@ nav ul li a.active::after {
     padding-bottom: 10px;
 }
 
+/* Centered featured grid with 3 products */
+.centered-featured-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+    justify-content: center;
+}
+
 .featured-products h2::after, .categories h2::after {
     content: '';
     position: absolute;
@@ -323,6 +333,26 @@ nav ul li a.active::after {
 .product-card.limited-edition {
     border: 2px solid var(--primary-color);
     box-shadow: 0 0 15px var(--primary-color);
+}
+
+/* Special highlight for featured products */
+.product-card.featured-highlight {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 20px var(--primary-color);
+    transform: scale(1.05);
+    position: relative;
+    z-index: 1;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 15px var(--primary-color); }
+    50% { box-shadow: 0 0 25px var(--primary-color); }
+    100% { box-shadow: 0 0 15px var(--primary-color); }
+}
+
+.product-card.featured-highlight:hover {
+    transform: translateY(-5px) scale(1.05);
 }
 
 .limited-edition-label {
@@ -946,7 +976,19 @@ footer {
 }
 
 /* Responsive Design */
+@media screen and (max-width: 992px) {
+    .centered-featured-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 900px;
+    }
+}
+
 @media screen and (max-width: 768px) {
+    .centered-featured-grid {
+        grid-template-columns: repeat(1, 1fr);
+        max-width: 400px;
+    }
+    
     header {
         flex-direction: column;
         padding: 15px;
@@ -1067,7 +1109,8 @@ footer {
 
 @media screen and (max-width: 480px) {
     .product-grid,
-    .category-grid {
+    .category-grid,
+    .centered-featured-grid {
         grid-template-columns: 1fr;
     }
     

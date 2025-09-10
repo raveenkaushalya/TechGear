@@ -25,7 +25,7 @@ function renderMainLayout($content, $sidebarCollapsed = false) {
                 <a href="dashboard.php" class="flex items-center gap-3 text-decoration-none">
                     <?php renderDashboardIcon('size-8 text-primary group-data-[collapsible=icon]:size-6'); ?>
                     <span class="text-lg font-semibold group-data-[collapsible=icon]:hidden">
-                        IndigoFlow
+                    TechGear
                     </span>
                 </a>
             </div>
@@ -33,7 +33,7 @@ function renderMainLayout($content, $sidebarCollapsed = false) {
                 <?php renderNav(); ?>
             </div>
             <div class="sidebar-footer p-4">
-                <button class="button variant-ghost h-10 w-full justify-start p-2 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center"
+                <a href="../admin/logout.php" class="button variant-ghost h-10 w-full justify-start p-2 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center text-decoration-none"
                        data-bs-toggle="tooltip" data-bs-placement="right" title="Logout">
                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -41,7 +41,7 @@ function renderMainLayout($content, $sidebarCollapsed = false) {
                         <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
                     <span class="group-data-[collapsible=icon]:hidden">Logout</span>
-                </button>
+                </a>
             </div>
             <div class="sidebar-rail"></div>
         </div>

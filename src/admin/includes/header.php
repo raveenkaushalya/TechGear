@@ -9,6 +9,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Prevent caching for security -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title><?php echo $pageTitle ?? 'IndigoFlow'; ?></title>
     
     <!-- Bootstrap CSS -->
@@ -19,6 +23,9 @@
     
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Security JS -->
+    <script src="assets/js/security.js"></script>
     
     <!-- Page-specific CSS -->
     <?php if (isset($pageSpecificCSS)): ?>

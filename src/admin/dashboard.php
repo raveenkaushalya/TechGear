@@ -6,6 +6,21 @@
  * Preserving all styling and structure
  */
 
+// Include security functions
+require_once('includes/security.php');
+
+// Start secure session
+secureSession();
+
+// Check if user is logged in, redirect to login if not
+if (!isAdminLoggedIn()) {
+    header('Location: login.php');
+    exit();
+}
+
+// Check for session timeout
+checkSessionTimeout();
+
 // Include the main layout component
 require_once('components/main-layout.php');
 

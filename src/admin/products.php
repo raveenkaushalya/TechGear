@@ -147,6 +147,78 @@ function renderCategoryOptions($categories) {
 
 // Generate the products content
 $pageContent = '
+<!-- Custom CSS for product details modal -->
+<style>
+.product-details {
+    margin-bottom: 20px;
+}
+
+.product-details p {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.product-image-preview {
+    margin-top: 15px;
+    max-width: 300px;
+}
+
+.product-image-preview img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.action-button:hover {
+    background-color: #f0f0f0;
+}
+
+.action-button.edit {
+    color: #4a6cf7;
+}
+
+.action-button.delete {
+    color: #e63946;
+}
+
+.action-button.view {
+    color: #2a9d8f;
+}
+
+.action-button.duplicate {
+    color: #e76f51;
+}
+
+.action-button svg {
+    width: 18px;
+    height: 18px;
+}
+</style>
 <div class="flex flex-col gap-8">
     ' . renderPageHeader('Product Management') . '
     
@@ -243,26 +315,64 @@ foreach ($products as $product) {
                 ' . $product['quantity'] . '
             </td>
             <td class="table-cell">
-                <div class="dropdown-menu">
-                    <button class="dropdown-menu-trigger button size-icon variant-ghost" 
-                            onclick="toggleDropdown(\'' . $product['id'] . '\')"
-                            data-bs-toggle="tooltip"
-                            data-bs-title="Actions">
-                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="5" r="1"></circle>
-                            <circle cx="12" cy="12" r="1"></circle>
-                            <circle cx="12" cy="19" r="1"></circle>
+                <div class="action-buttons">
+                    <!-- View button -->
+                    <button class="action-button view" onclick="viewProductDetails(\'' . $product['id'] . '\')" title="View Product Details">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
                         </svg>
-                        <span class="sr-only">Toggle menu</span>
                     </button>
-                    <div class="dropdown-menu-content" id="dropdown-' . $product['id'] . '" style="display: none;">
-                        <div class="dropdown-menu-label">Actions</div>
-                        <button class="dropdown-menu-item' . (!$dbConnected ? ' disabled" disabled="disabled"' : '"') . ' onclick="editProduct(\'' . $product['id'] . '\')">Edit</button>
-                        <form method="post" style="display:inline;" onsubmit="return ' . ($dbConnected ? 'confirm(\'Are you sure you want to delete this product?\')' : 'false') . '">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="id" value="' . $product['id'] . '">
-                            <button type="submit" class="dropdown-menu-item text-destructive' . (!$dbConnected ? ' disabled" disabled="disabled"' : '"') . '>Delete</button>
-                        </form>
+                    
+                    <!-- Edit button -->
+                    <button class="action-button edit' . (!$dbConnected ? ' disabled" disabled="disabled"' : '"') . ' onclick="editProduct(\'' . $product['id'] . '\')" title="Edit Product">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Duplicate button -->
+                    <button class="action-button duplicate' . (!$dbConnected ? ' disabled" disabled="disabled"' : '"') . ' onclick="duplicateProduct(\'' . $product['id'] . '\')" title="Duplicate Product">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Delete form -->
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" value="' . $product['id'] . '">
+                        <button type="submit" ' . (!$dbConnected ? 'disabled="disabled" ' : '') . 'class="action-button delete' . (!$dbConnected ? ' disabled' : '') . '" 
+                            title="Delete Product" onclick="return ' . ($dbConnected ? 'confirm(\'Are you sure you want to delete this product?\')' : 'false') . '">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                        </button>
+                        </button>
+                    </form>
+                    
+                    <div class="dropdown-menu">
+                        <button class="dropdown-menu-trigger button size-icon variant-ghost" 
+                                onclick="toggleDropdown(\'' . $product['id'] . '\')"
+                                data-bs-toggle="tooltip"
+                                data-bs-title="More Actions">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                            <span class="sr-only">More Actions</span>
+                        </button>
+                        <div class="dropdown-menu-content" id="dropdown-' . $product['id'] . '" style="display: none;">
+                            <div class="dropdown-menu-label">More Actions</div>
+                            <button class="dropdown-menu-item' . (!$dbConnected ? ' disabled" disabled="disabled"' : '"') . ' onclick="viewProductDetails(\'' . $product['id'] . '\')">View Details</button>
+                            <button class="dropdown-menu-item' . (!$dbConnected ? ' disabled" disabled="disabled"' : '"') . ' onclick="duplicateProduct(\'' . $product['id'] . '\')">Duplicate</button>
+                        </div>
                     </div>
                 </div>
             </td>
@@ -367,7 +477,7 @@ $pageContent .= '
     const dbConnected = ' . ($dbConnected ? 'true' : 'false') . ';
     
     function toggleDropdown(productId) {
-        const dropdown = document.getElementById(`dropdown-${productId}`);
+        const dropdown = document.getElementById("dropdown-" + productId);
         if (dropdown) {
             dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
         }
@@ -397,7 +507,7 @@ $pageContent .= '
             return;
         }
         
-        const row = document.querySelector(`tr[data-product-id="\${productId}"]`);
+        const row = document.querySelector("tr[data-product-id=\"" + productId + "\"]");
         if (!row) return;
         
         document.getElementById("dialog-title").textContent = "Edit Product";
@@ -405,15 +515,15 @@ $pageContent .= '
         
         // Populate form with product data from data attributes
         document.getElementById("product-id").value = productId;
-        document.getElementById("product-name").value = row.dataset.name || \'\';
-        document.getElementById("product-description").value = row.dataset.description || \'\';
-        document.getElementById("product-price").value = row.dataset.price || \'\';
-        document.getElementById("product-quantity").value = row.dataset.quantity || \'\';
-        document.getElementById("product-category").value = row.dataset.category_id || \'\';
-        document.getElementById("product-status").value = row.dataset.status || \'\';
-        document.getElementById("product-featured").checked = row.dataset.featured === \'1\';
-        document.getElementById("product-limited").checked = row.dataset.limited_edition === \'1\';
-        document.getElementById("product-image").value = row.dataset.image_path || \'\';
+        document.getElementById("product-name").value = row.dataset.name || "";
+        document.getElementById("product-description").value = row.dataset.description || "";
+        document.getElementById("product-price").value = row.dataset.price || "";
+        document.getElementById("product-quantity").value = row.dataset.quantity || "";
+        document.getElementById("product-category").value = row.dataset.category_id || "";
+        document.getElementById("product-status").value = row.dataset.status || "";
+        document.getElementById("product-featured").checked = row.dataset.featured === "1";
+        document.getElementById("product-limited").checked = row.dataset.limited_edition === "1";
+        document.getElementById("product-image").value = row.dataset.image_path || "";
         
         document.getElementById("product-dialog").style.display = "block";
     }
@@ -422,7 +532,7 @@ $pageContent .= '
     function generateProductId() {
         const prefix = document.getElementById("product-category").value.substring(0, 1);
         const timestamp = Date.now().toString().substring(8);
-        return prefix + '-' + timestamp;
+        return prefix + "-" + timestamp;
     }
     
     // Close dropdowns when clicking outside
@@ -441,6 +551,212 @@ $pageContent .= '
             document.getElementById("product-id").value = generateProductId();
         }
     });
+    
+    // View product details function
+    function viewProductDetails(productId) {
+        if (!dbConnected) {
+            alert("Database is not available. Product details may not be complete in offline mode.");
+        }
+        
+        const row = document.querySelector("tr[data-product-id=\"" + productId + "\"]");
+        if (!row) return;
+        
+        // Build a nicely formatted details view
+        const name = row.dataset.name || "Unknown Product";
+        const description = row.dataset.description || "No description available";
+        const price = row.dataset.price ? "$" + parseFloat(row.dataset.price).toFixed(2) : "Price not set";
+        const quantity = row.dataset.quantity || "0";
+        const category = row.dataset.category_name || row.dataset.category_id || "Uncategorized";
+        const status = row.dataset.status || "Unknown";
+        const featured = row.dataset.featured === "1" ? "Yes" : "No";
+        const limitedEdition = row.dataset.limited_edition === "1" ? "Yes" : "No";
+        const imagePath = row.dataset.image_path || "No image";
+        
+        // Create modal content
+        let modalContent = "<h2>" + name + "</h2>";
+        modalContent += "<div class=\"product-details\">";
+        modalContent += "<p><strong>ID:</strong> " + productId + "</p>";
+        modalContent += "<p><strong>Description:</strong> " + description + "</p>";
+        modalContent += "<p><strong>Price:</strong> " + price + "</p>";
+        modalContent += "<p><strong>Quantity:</strong> " + quantity + "</p>";
+        modalContent += "<p><strong>Category:</strong> " + category + "</p>";
+        modalContent += "<p><strong>Status:</strong> " + status + "</p>";
+        modalContent += "<p><strong>Featured:</strong> " + featured + "</p>";
+        modalContent += "<p><strong>Limited Edition:</strong> " + limitedEdition + "</p>";
+        modalContent += "<p><strong>Image Path:</strong> " + imagePath + "</p>";
+        if (row.dataset.image_path) {
+            modalContent += "<div class=\"product-image-preview\"><img src=\"" + row.dataset.image_path + "\" alt=\"" + name + "\" /></div>";
+        }
+        modalContent += "</div>";
+        modalContent += "<div class=\"modal-actions\">";
+        modalContent += "<button onclick=\"closeDetailsModal()\" class=\"button\">Close</button>";
+        modalContent += "<button onclick=\"editProduct(\\\"" + productId + "\\\")\" class=\"button primary\">Edit Product</button>";
+        modalContent += "</div>";
+        
+        // Show the modal
+        const detailsModal = document.getElementById("product-details-modal") || createDetailsModal();
+        detailsModal.querySelector(".modal-content").innerHTML = modalContent;
+        detailsModal.style.display = "block";
+    }
+    
+    // Create modal for product details
+    function createDetailsModal() {
+        const modal = document.createElement("div");
+        modal.id = "product-details-modal";
+        modal.className = "modal";
+        modal.style.display = "none";
+        
+        const modalContent = document.createElement("div");
+        modalContent.className = "modal-content product-details-content";
+        modal.appendChild(modalContent);
+        
+        document.body.appendChild(modal);
+        return modal;
+    }
+    
+    // Close the product details modal
+    function closeDetailsModal() {
+        const detailsModal = document.getElementById("product-details-modal");
+        if (detailsModal) {
+            detailsModal.style.display = "none";
+        }
+    }
+    
+    // Duplicate a product
+    function duplicateProduct(productId) {
+        if (!dbConnected) {
+            alert("Database is not available. You cannot duplicate products in offline mode.");
+            return;
+        }
+        
+        const row = document.querySelector("tr[data-product-id=\"" + productId + "\"]");
+        if (!row) return;
+        
+        // Set up the product dialog for a new product, but with data from the original
+        document.getElementById("dialog-title").textContent = "Duplicate Product";
+        document.getElementById("form-action").value = "add";
+        
+        // Generate a new ID but keep the data
+        const originalId = productId;
+        const newId = generateProductId();
+        
+        // Populate form with product data from data attributes
+        document.getElementById("product-id").value = newId;
+        document.getElementById("product-name").value = "Copy of " + (row.dataset.name || "");
+        document.getElementById("product-description").value = row.dataset.description || "";
+        document.getElementById("product-price").value = row.dataset.price || "";
+        document.getElementById("product-quantity").value = row.dataset.quantity || "";
+        document.getElementById("product-category").value = row.dataset.category_id || "";
+        document.getElementById("product-status").value = row.dataset.status || "";
+        document.getElementById("product-featured").checked = row.dataset.featured === "1";
+        document.getElementById("product-limited").checked = row.dataset.limited_edition === "1";
+        document.getElementById("product-image").value = row.dataset.image_path || "";
+        
+        document.getElementById("product-dialog").style.display = "block";
+    }
+    
+    // View product details function
+    function viewProductDetails(productId) {
+        if (!dbConnected) {
+            alert("Database is not available. Product details may not be complete in offline mode.");
+        }
+        
+        const row = document.querySelector("tr[data-product-id=\"" + productId + "\"]");
+        if (!row) return;
+        
+        // Build a nicely formatted details view
+        const name = row.dataset.name || "Unknown Product";
+        const description = row.dataset.description || "No description available";
+        const price = row.dataset.price ? "$" + parseFloat(row.dataset.price).toFixed(2) : "Price not set";
+        const quantity = row.dataset.quantity || "0";
+        const category = row.dataset.category_name || row.dataset.category_id || "Uncategorized";
+        const status = row.dataset.status || "Unknown";
+        const featured = row.dataset.featured === "1" ? "Yes" : "No";
+        const limitedEdition = row.dataset.limited_edition === "1" ? "Yes" : "No";
+        const imagePath = row.dataset.image_path || "No image";
+        
+        // Create modal content
+        let modalContent = "<h2>" + name + "</h2>";
+        modalContent += "<div class=\"product-details\">";
+        modalContent += "<p><strong>ID:</strong> " + productId + "</p>";
+        modalContent += "<p><strong>Description:</strong> " + description + "</p>";
+        modalContent += "<p><strong>Price:</strong> " + price + "</p>";
+        modalContent += "<p><strong>Quantity:</strong> " + quantity + "</p>";
+        modalContent += "<p><strong>Category:</strong> " + category + "</p>";
+        modalContent += "<p><strong>Status:</strong> " + status + "</p>";
+        modalContent += "<p><strong>Featured:</strong> " + featured + "</p>";
+        modalContent += "<p><strong>Limited Edition:</strong> " + limitedEdition + "</p>";
+        modalContent += "<p><strong>Image Path:</strong> " + imagePath + "</p>";
+        if (row.dataset.image_path) {
+            modalContent += "<div class=\"product-image-preview\"><img src=\"" + row.dataset.image_path + "\" alt=\"" + name + "\" /></div>";
+        }
+        modalContent += "</div>";
+        modalContent += "<div class=\"modal-actions\">";
+        modalContent += "<button onclick=\"closeDetailsModal()\" class=\"button\">Close</button>";
+        modalContent += "<button onclick=\"editProduct(\'" + productId + "\')\" class=\"button primary\">Edit Product</button>";
+        modalContent += "</div>";
+        
+        // Show the modal
+        const detailsModal = document.getElementById("product-details-modal") || createDetailsModal();
+        detailsModal.querySelector(".modal-content").innerHTML = modalContent;
+        detailsModal.style.display = "block";
+    }
+    
+    // Create product details modal if it does not exist
+    function createDetailsModal() {
+        const modal = document.createElement("div");
+        modal.id = "product-details-modal";
+        modal.className = "modal";
+        modal.style.display = "none";
+        
+        const modalContent = document.createElement("div");
+        modalContent.className = "modal-content product-details-content";
+        modal.appendChild(modalContent);
+        
+        document.body.appendChild(modal);
+        return modal;
+    }
+    
+    // Close the product details modal
+    function closeDetailsModal() {
+        const detailsModal = document.getElementById("product-details-modal");
+        if (detailsModal) {
+            detailsModal.style.display = "none";
+        }
+    }
+    
+    // Duplicate a product
+    function duplicateProduct(productId) {
+        if (!dbConnected) {
+            alert("Database is not available. You cannot duplicate products in offline mode.");
+            return;
+        }
+        
+        const row = document.querySelector("tr[data-product-id=\"" + productId + "\"]");
+        if (!row) return;
+        
+        // Set up the product dialog for a new product, but with data from the original
+        document.getElementById("dialog-title").textContent = "Duplicate Product";
+        document.getElementById("form-action").value = "add";
+        
+        // Generate a new ID but keep the data
+        const originalId = productId;
+        const newId = generateProductId();
+        
+        // Populate form with product data from data attributes
+        document.getElementById("product-id").value = newId;
+        document.getElementById("product-name").value = "Copy of " + (row.dataset.name || "");
+        document.getElementById("product-description").value = row.dataset.description || "";
+        document.getElementById("product-price").value = row.dataset.price || "";
+        document.getElementById("product-quantity").value = row.dataset.quantity || "";
+        document.getElementById("product-category").value = row.dataset.category_id || "";
+        document.getElementById("product-status").value = row.dataset.status || "";
+        document.getElementById("product-featured").checked = row.dataset.featured === "1";
+        document.getElementById("product-limited").checked = row.dataset.limited_edition === "1";
+        document.getElementById("product-image").value = row.dataset.image_path || "";
+        
+        document.getElementById("product-dialog").style.display = "block";
+    }
 </script>';
 
 // Render the layout with our content

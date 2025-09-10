@@ -246,7 +246,7 @@ nav ul li a.active::after {
 .centered-featured-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
+    gap: 50px;
     max-width: 1000px;
     margin: 0 auto;
     justify-content: center;

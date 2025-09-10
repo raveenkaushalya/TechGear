@@ -13,7 +13,7 @@ const products = [
     { id: 'm4', name: 'MMO Gaming Mouse', description: 'MMO Gaming Mouse with 12 Programmable Side Buttons', price: 79.99, image: '../assets/images/m4.jpg', category: 'mice' },
     { id: 'm5', name: 'Premium Gaming Mouse', description: 'Ultralight Gaming Mouse with PTFE Feet and Paracord Cable', price: 89.99, image: '../assets/images/m5.jpg', category: 'mice' },
     { id: 'm6', name: 'Classic Mouse', description: 'Reliable Wired Mouse for Everyday Use', price: 29.99, image: '../assets/images/m6.jpg', category: 'mice' },
-    { id: 'mn1', name: 'Gaming Monitor', description: '27-inch 144Hz Gaming Monitor with 1ms Response Time', price: 299.99, image: '../assets/images/mn1.jpg', category: 'monitors', featured: true },
+    { id: 'mn1', name: 'Samsung Odyssey G5', description: '32-inch QHD Curved Gaming Monitor with 165Hz Refresh Rate and 1ms Response Time', price: 349.99, image: '../assets/images/mn1.jpg?v=new', category: 'monitors', featured: true, limited: true },
     { id: 'mn2', name: 'Ultrawide Monitor', description: '34-inch Curved Ultrawide Monitor with 21:9 Aspect Ratio', price: 449.99, image: '../assets/images/mn2.jpg', category: 'monitors' },
     { id: 'mn3', name: '4K Professional Monitor', description: '32-inch 4K Professional Monitor with 99% Adobe RGB Coverage', price: 599.99, image: '../assets/images/mn3.jpg', category: 'monitors' },
     { id: 'mn4', name: '240Hz Esports Monitor', description: '24.5-inch 1080p 240Hz TN Monitor for Competitive Gaming', price: 349.99, image: '../assets/images/mn4.jpg', category: 'monitors' },
@@ -181,7 +181,7 @@ function loadProducts() {
         const featuredProducts = [
             products.find(p => p.id === 'k7'), // Transformer Edition Keyboard (Limited Edition)
             products.find(p => p.id === 'm1'), // Cyberpunk mouse (Limited Edition)
-            products.find(p => p.id === 'mn1')  // Monitor
+            products.find(p => p.id === 'mn1')  // Samsung Odyssey G5 Monitor
         ];
         
         featuredProducts.forEach((p, index) => {
@@ -189,8 +189,8 @@ function loadProducts() {
             
             const card = createProductCard(p);
             
-            // Add a special highlight class to the limited edition products
-            if (p.id === 'm1' || p.id === 'k7') {
+            // Add a special highlight class to all featured products
+            if (p.id === 'm1' || p.id === 'k7' || p.id === 'mn1') {
                 card.classList.add('featured-highlight');
             }
             

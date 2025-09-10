@@ -20,7 +20,7 @@
 
     <section class="category-hero">
         <div class="hero-content">
-            <h2>Product</h2>
+            <h2>Our Products</h2>
             <p>Explore our wide range of high-quality tech products</p>
         </div>
     </section>

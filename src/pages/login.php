@@ -14,13 +14,38 @@
     <link rel="stylesheet" href="../assets/css/no-outline.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="../assets/js/app.js" defer></script>
+    <style>
+        .auth-box { opacity: 0; transform: translateY(30px); transition: opacity 0.6s cubic-bezier(.4,0,.2,1), transform 0.6s cubic-bezier(.4,0,.2,1); }
+        .auth-box.visible { opacity: 1; transform: translateY(0); }
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(24,28,32,0.85);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(.4,0,.2,1);
+        }
+        .loading-overlay.active { opacity: 1; pointer-events: all; }
+        .loading-spinner {
+            border: 4px solid #23272b;
+            border-top: 4px solid #00bfff;
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body class="auth-page">
     <!-- PHP include for header -->
     <?php include('../components/header.html'); ?>
 
     <main class="auth-container">
-        <div class="auth-box">
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+        </div>
+        <div class="auth-box" id="userLoginBox">
             <div class="auth-header">
                 <h1>Login to Your Account</h1>
                 <p>Welcome back! Please enter your credentials to continue.</p>
@@ -79,40 +104,40 @@
     <script src="../assets/js/auth.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Fade-in animation for login box
+            setTimeout(function() {
+                document.getElementById('userLoginBox').classList.add('visible');
+            }, 100);
             // Update cart icon if function exists
             if (typeof updateCartIcon === 'function') {
                 updateCartIcon();
             }
-            
             // Form validation
             const loginForm = document.getElementById('login-form');
             if (loginForm) {
                 loginForm.addEventListener('submit', function(event) {
-                    // Basic form validation can be added here
                     event.preventDefault();
-                    
+                    // Show loading overlay
+                    document.getElementById('loadingOverlay').classList.add('active');
                     // Get the username value
                     const username = document.getElementById('username').value;
                     if (!username) {
                         alert('Please enter a username');
+                        document.getElementById('loadingOverlay').classList.remove('active');
                         return;
                     }
-                    
                     // Simulate login (in a real app this would validate against a database)
                     if (typeof loginUser === 'function') {
                         loginUser(username);
                     }
-                    
                     // Display success message
                     if (typeof showLoginNotification === 'function') {
                         showLoginNotification('Login successful! Redirecting...', 'success');
                     } else {
                         alert('Login successful!');
                     }
-                    
                     // Check if we should redirect to checkout
                     const checkoutRedirect = localStorage.getItem('checkoutRedirect');
-                    
                     // Redirect after a short delay
                     setTimeout(() => {
                         if (checkoutRedirect) {

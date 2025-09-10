@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechGear Shop - PHP Version</title>
+    <title>TechGear Shop</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/utility.css">
     <link rel="stylesheet" href="../assets/css/user-actions.css">

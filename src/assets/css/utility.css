@@ -16,3 +16,37 @@
 .empty-cart-message.active {
     display: flex;
 }
+
+/* Notification banner styles */
+.notification {
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    color: #fff;
+    text-align: center;
+    font-size: 0.9rem;
+    position: relative;
+    width: 100%;
+}
+
+.notification-error {
+    background-color: #f44336;
+}
+
+.notification-warning {
+    background-color: #ff9800;
+}
+
+.notification-info {
+    background-color: #2196f3;
+}
+
+.notification-success {
+    background-color: #4caf50;
+}
+
+.notification-details {
+    margin-top: 5px;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}

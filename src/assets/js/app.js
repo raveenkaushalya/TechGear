@@ -188,6 +188,10 @@ async function loadProducts() {
     // First fetch products from API
     await fetchProductsFromAPI();
     
+    // Determine which page we're on
+    const isHomePage = window.location.pathname.includes('index.php') || window.location.pathname === '/' || window.location.pathname.endsWith('/TechGear/');
+    const isCategoriesPage = window.location.pathname.includes('categories.php');
+    
     const map = {
         featured: '.featured-products .product-grid',
         keyboards: '#keyboards .product-grid',
@@ -204,24 +208,27 @@ async function loadProducts() {
         headphones: '[data-category="headphones"]'
     };
     
-    // Clear existing content
-    Object.values(map).forEach(selector => {
-        const element = document.querySelector(selector);
-        if (element) {
-            element.innerHTML = '';
-        }
-    });
+    // Clear existing content for the appropriate page
+    if (isHomePage) {
+        // Clear home page elements
+        Object.values(map).forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.innerHTML = '';
+            }
+        });
+    } else if (isCategoriesPage) {
+        // Clear categories page elements
+        Object.values(categoryMap).forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.innerHTML = '';
+            }
+        });
+    }
     
-    // Clear categories page grids
-    Object.values(categoryMap).forEach(selector => {
-        const element = document.querySelector(selector);
-        if (element) {
-            element.innerHTML = '';
-        }
-    });
-    
-    // Load featured products if featured section exists
-    if (document.querySelector(map.featured)) {
+    // Load featured products if featured section exists (home page only)
+    if (isHomePage && document.querySelector(map.featured)) {
         // Since database products don't have featured flag, show first few products as featured
         const featuredProducts = products.slice(0, 4);
         featuredProducts.forEach(p => {
@@ -229,20 +236,22 @@ async function loadProducts() {
         });
     }
     
-    // Load products by category for both home page and categories page
+    // Load products by category
     ['keyboards','mice','monitors','headphones'].forEach(cat => {
         const categoryProducts = products.filter(p => p.category === cat);
         
-        // Home page structure
-        const homeEl = document.querySelector(map[cat]);
-        if (homeEl) {
-            categoryProducts.forEach(p => homeEl.appendChild(createProductCard(p)));
-        }
-        
-        // Categories page structure
-        const categoryEl = document.querySelector(categoryMap[cat]);
-        if (categoryEl) {
-            categoryProducts.forEach(p => categoryEl.appendChild(createProductCard(p)));
+        if (isHomePage) {
+            // Home page structure
+            const homeEl = document.querySelector(map[cat]);
+            if (homeEl) {
+                categoryProducts.forEach(p => homeEl.appendChild(createProductCard(p)));
+            }
+        } else if (isCategoriesPage) {
+            // Categories page structure
+            const categoryEl = document.querySelector(categoryMap[cat]);
+            if (categoryEl) {
+                categoryProducts.forEach(p => categoryEl.appendChild(createProductCard(p)));
+            }
         }
     });
 }
@@ -531,7 +540,7 @@ function setupGlobalEventHandlers() {
             }
             
             if (e.target.classList.contains('continue-shopping')) { 
-                window.location.href = 'categories.php'; 
+                window.location.href = '/TechGear/src/pages/categories.php'; 
             }
             
             if (e.target.classList.contains('checkout-btn')) {
@@ -549,7 +558,7 @@ function setupGlobalEventHandlers() {
                     
                     // Redirect to login page
                     setTimeout(() => {
-                        window.location.href = 'login.php';
+                        window.location.href = '/TechGear/src/pages/login.php';
                     }, 1500);
                 } else {
                     // User is logged in, proceed with checkout
@@ -603,7 +612,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartIcon();
     }
     
-    loadProducts();
+    // Only load products if not already loaded by the page-specific script
+    if (!window.productsLoadedByPage) {
+        loadProducts();
+    }
     setupStaticProductCards();
     setupGlobalEventHandlers();
     renderCartPage();

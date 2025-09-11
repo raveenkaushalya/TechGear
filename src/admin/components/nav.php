@@ -13,10 +13,8 @@ function renderNav() {
     $navItems = [
         ['href' => 'dashboard.php', 'label' => 'Dashboard', 'icon' => 'dashboard'],
         ['href' => 'users.php', 'label' => 'Users', 'icon' => 'users'],
-        ['href' => 'products.php', 'label' => 'Products', 'icon' => 'products'],
+        ['href' => 'product-manager.php', 'label' => 'Products', 'icon' => 'products'],
         ['href' => 'payments.php', 'label' => 'Payments', 'icon' => 'payments'],
-        ['href' => 'content.php', 'label' => 'Content', 'icon' => 'content'],
-        ['href' => 'activity.php', 'label' => 'Activity', 'icon' => 'activity'],
         ['href' => 'settings.php', 'label' => 'Settings', 'icon' => 'settings'],
     ];
 
@@ -55,12 +53,6 @@ function renderNav() {
                 break;
             case 'payments':
                 renderPaymentIcon('size-4');
-                break;
-            case 'content':
-                renderContentIcon('size-4');
-                break;
-            case 'activity':
-                renderActivityIcon('size-4');
                 break;
             case 'settings':
                 renderSettingsIcon('size-4');

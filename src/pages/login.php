@@ -144,7 +144,7 @@
                             localStorage.removeItem('checkoutRedirect'); // Clear the redirect
                             window.location.href = checkoutRedirect;
                         } else {
-                            window.location.href = 'index.php';
+                            window.location.href = '/TechGear/index.php';
                         }
                     }, 1500);
                 });

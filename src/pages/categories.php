@@ -108,6 +108,9 @@ if (!$db_connected) {
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Categories page DOMContentLoaded');
             
+            // Set flag to prevent app.js from loading products again
+            window.productsLoadedByPage = true;
+            
             // Load products from database API using the proper function from app.js
             loadProducts();
             

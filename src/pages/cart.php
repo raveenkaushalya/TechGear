@@ -53,7 +53,7 @@
                 <i class="fas fa-shopping-cart fa-4x"></i>
                 <h2>Your cart is empty</h2>
                 <p>Looks like you haven't added any products to your cart yet.</p>
-                <a href="categories.php" class="btn">Start Shopping</a>
+                <a href="/TechGear/src/pages/categories.php" class="btn">Start Shopping</a>
             </div>
         </div>
     </main>
@@ -83,7 +83,7 @@
             
             // Set up continue shopping button
             document.querySelector('.continue-shopping').addEventListener('click', function() {
-                window.location.href = 'categories.php';
+                window.location.href = '/TechGear/src/pages/categories.php';
             });
         });
     </script>

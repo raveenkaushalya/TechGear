@@ -63,17 +63,20 @@
     
     <script>
         // This script initializes the page with PHP-included components
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Index page DOMContentLoaded');
+            
             // Product modal is already included via PHP
             if (typeof setupProductModal === 'function') {
                 setupProductModal();
             }
             
-            // Note: loadProducts is already called in app.js, so we don't call it here
-            // to avoid duplicate product cards
-            
-            if (typeof setupStaticProductCards === 'function') {
-                setupStaticProductCards();
+            // Load products from database only - no static products
+            if (typeof loadProducts === 'function') {
+                console.log('Calling loadProducts from index.php');
+                await loadProducts();
+            } else {
+                console.error('loadProducts function not found');
             }
             
             if (typeof setupGlobalEventHandlers === 'function') {

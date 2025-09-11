@@ -1,57 +1,16 @@
 <?php
-// Advanced Admin Login Page with Security Features
-require_once('includes/security.php');
-
-// Start secure session
-secureSession();
-
-// Check if there's a logout message
-$message = '';
-$messageClass = '';
-if (isset($_SESSION['logout_message'])) {
-    $message = $_SESSION['logout_message'];
-    $messageClass = 'info';
-    unset($_SESSION['logout_message']);
-}
-
-// Initialize variables
+// Simple Admin Login Page
+session_start();
 $error = '';
-$username = '';
-
-// Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-    $ip_address = $_SERVER['REMOTE_ADDR'];
-    
-    // Check for brute force attempts
-    if (checkBruteForce($ip_address)) {
-        $error = 'Too many failed login attempts. Please try again later.';
-        logLoginAttempt($username, false, $ip_address);
-    } 
-    // Hardcoded admin credentials (for demo only - in production, use database)
-    else if ($username === 'admin' && $password === 'admin123') {
-        // Log successful login
-        logLoginAttempt($username, true, $ip_address);
-        
-        // Set session variables
+    // Hardcoded admin credentials (for demo only)
+    if ($username === 'admin' && $password === 'admin123') {
         $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_id'] = 1; // In production, use actual user ID
-        $_SESSION['admin_username'] = $username;
-        $_SESSION['admin_last_activity'] = time();
-        
-        // Regenerate session ID for security
-        regenerateSession();
-        
-        // Generate initial CSRF token
-        generateCSRFToken();
-        
-        // Redirect to dashboard
         header('Location: dashboard.php');
         exit();
     } else {
-        // Log failed login attempt
-        logLoginAttempt($username, false, $ip_address);
         $error = 'Invalid username or password.';
     }
 }
@@ -73,8 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .admin-login-box button { width: 100%; padding: 0.7rem; background: #007bff; color: #fff; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; }
         .admin-login-box button:hover { background: #0056b3; }
         .admin-login-box .error { color: #ff4d4f; margin-bottom: 1rem; }
-        .admin-login-box .message { margin-bottom: 1rem; padding: 10px; border-radius: 4px; background-color: #3b4044; }
-        .admin-login-box .message.info { color: #4cc9f0; border-left: 4px solid #4cc9f0; }
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -103,9 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Admin Login</h2>
         <?php if ($error): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        <?php if ($message): ?>
-            <div class="message <?= $messageClass ?>"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
         <label for="username">Username</label>
         <input type="text" id="username" name="username" required autofocus>

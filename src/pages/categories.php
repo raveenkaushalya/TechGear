@@ -5,25 +5,44 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include the product manager to access products and categories
-require_once '../includes/product_manager.php';
+// Include database connection
+require_once(__DIR__ . '/../includes/db_connection.php');
 
 // Check database connection status
-$dbConnected = $productManager->isDatabaseConnected();
-$dbStatus = $productManager->getDatabaseStatus();
+global $db_connected;
 
-// Get all categories (will use fallback data if database is not connected)
-$categories = $productManager->getAllCategories();
-
-// Get products from the database based on the category
-function getCategoryProducts($categoryId) {
-    global $productManager;
-    return $productManager->getAllProducts($categoryId);
+// Get categories from fallback data or implement category system
+function getCategories() {
+    return [
+        [
+            'id' => 'keyboards',
+            'name' => 'Keyboards',
+            'description' => 'Discover our selection of premium mechanical keyboards, perfect for gaming and productivity.'
+        ],
+        [
+            'id' => 'mice',
+            'name' => 'Mice',
+            'description' => 'Find the perfect gaming and productivity mice with precision sensors and ergonomic designs.'
+        ],
+        [
+            'id' => 'monitors',
+            'name' => 'Monitors',
+            'description' => 'Upgrade your visual experience with our high-performance gaming and professional monitors.'
+        ],
+        [
+            'id' => 'headphones',
+            'name' => 'Headphones',
+            'description' => 'Experience superior audio with our range of gaming headsets and professional headphones.'
+        ]
+    ];
 }
+
+// Get products dynamically using JavaScript from API
+$categories = getCategories();
 
 // Create a notification variable that we'll use to display database status
 $notification = null;
-if (!$dbConnected) {
+if (!$db_connected) {
     $notification = [
         'type' => 'info',
         'message' => 'Using backup product data. Database connection is currently unavailable.'
@@ -51,7 +70,7 @@ if (!$dbConnected) {
     <!-- Database status notification -->
     <div class="notification notification-<?php echo $notification['type']; ?>">
         <p><?php echo htmlspecialchars($notification['message']); ?></p>
-        <?php if (!$dbConnected): ?>
+        <?php if (!$db_connected): ?>
             <p class="notification-details">
                 <small>Note: Products shown are from backup data. Some features may be limited.</small>
             </p>
@@ -73,33 +92,8 @@ if (!$dbConnected) {
         <div class="category-description">
             <p><?php echo htmlspecialchars($category['description']); ?></p>
         </div>
-        <div class="product-grid">
-            <?php 
-            // Get products for this category
-            $products = getCategoryProducts($category['id']);
-            foreach ($products as $product):
-                // Check if product has an image path
-                $imagePath = !empty($product['image_path']) ? $product['image_path'] : '../assets/images/placeholder.jpg';
-                
-                // Determine if it's a limited edition product
-                $limitedClass = $product['limited_edition'] ? 'limited-edition' : '';
-            ?>
-            <div class="product-card <?php echo $limitedClass; ?>" data-product-id="<?php echo $product['id']; ?>">
-                <div class="product-image">
-                    <img src="<?php echo htmlspecialchars($imagePath); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
-                </div>
-                <div class="product-info">
-                    <h3><?php echo htmlspecialchars($product['name']); ?> 
-                        <?php if ($product['limited_edition']): ?>
-                            <span class="limited-edition-label">(Limited Edition)</span>
-                        <?php endif; ?>
-                    </h3>
-                    <p class="product-description"><?php echo htmlspecialchars($product['description']); ?></p>
-                    <p class="product-price">$<?php echo number_format($product['price'], 2); ?></p>
-                    <button class="btn-add-to-cart">Add to Cart</button>
-                </div>
-            </div>
-            <?php endforeach; ?>
+        <div class="product-grid" data-category="<?php echo $category['id']; ?>">
+            <!-- Products will be loaded here via JavaScript -->
         </div>
     </section>
     <?php endforeach; ?>
@@ -111,7 +105,120 @@ if (!$dbConnected) {
     <?php include('../components/product-modal.html'); ?>
     
     <script>
+        // Load products dynamically from API
+        async function loadProducts() {
+            try {
+                console.log('Loading products from categories page...');
+                const res = await fetch('/TechGear/src/admin/api/products.php?status=active');
+                console.log('Response status:', res.status);
+                
+                const json = await res.json();
+                console.log('API Response:', json);
+                
+                if (!json.success) { 
+                    console.error('API Error:', json.error); 
+                    return; 
+                }
+                renderProductsByCategory(json.data || []);
+            } catch (error) {
+                console.error('Failed to load products:', error);
+            }
+        }
+
+        function renderProductsByCategory(products) {
+            console.log('Rendering products by category:', products.length);
+            
+            // Group products by category using the actual category field from database
+            const productsByCategory = {};
+            
+            products.forEach(product => {
+                // Use the category field from the database, fallback to keyword matching for legacy data
+                let category = product.category ? product.category.toLowerCase() : null;
+                
+                // If no category field, use legacy keyword matching
+                if (!category) {
+                    const categoryMap = {
+                        'keyboards': ['keyboard', 'k1', 'k2', 'k3', 'k4', 'k5'],
+                        'mice': ['mouse', 'mice', 'm1', 'm2', 'm3', 'm4', 'm5', 'm6'],
+                        'monitors': ['monitor', 'mn1', 'mn2', 'mn3', 'mn4', 'mn5'],
+                        'headphones': ['headset', 'headphone', 'h1', 'h2', 'h3', 'h4']
+                    };
+                    
+                    const productStr = (product.name + ' ' + product.id + ' ' + (product.image || '')).toLowerCase();
+                    category = 'other';
+                    
+                    for (const [cat, keywords] of Object.entries(categoryMap)) {
+                        if (keywords.some(keyword => productStr.includes(keyword))) {
+                            category = cat;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!productsByCategory[category]) {
+                    productsByCategory[category] = [];
+                }
+                productsByCategory[category].push(product);
+            });
+            
+            console.log('Products by category:', productsByCategory);
+
+            // Render products in each category grid
+            const categoryIds = ['keyboards', 'mice', 'monitors', 'headphones'];
+            categoryIds.forEach(categoryId => {
+                const grid = document.querySelector(`[data-category="${categoryId}"]`);
+                console.log(`Looking for grid: [data-category="${categoryId}"]`, grid);
+                
+                if (!grid) return;
+                
+                grid.innerHTML = '';
+                const categoryProducts = productsByCategory[categoryId] || [];
+                console.log(`Rendering ${categoryProducts.length} products for ${categoryId}`);
+                
+                categoryProducts.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.setAttribute('data-product-id', product.id);
+                    
+                    // Handle different image path formats
+                    let imageSrc = product.image || '';
+                    if (imageSrc && !imageSrc.startsWith('http')) {
+                        // Ensure relative paths work from pages directory
+                        if (imageSrc.startsWith('assets/')) {
+                            imageSrc = '../' + imageSrc;
+                        } else if (imageSrc.startsWith('src/assets/')) {
+                            imageSrc = imageSrc.replace('src/assets/', '../assets/');
+                        } else if (imageSrc.startsWith('uploads/')) {
+                            imageSrc = '../' + imageSrc;
+                        }
+                        // imageSrc already starting with ../ should work fine
+                    }
+                    
+                    console.log('Product:', product.name, 'Original image path:', product.image, 'Processed path:', imageSrc);
+                    
+                    productCard.innerHTML = `
+                        <div class="product-image">
+                            <img src="${imageSrc}" alt="${product.name}" onerror="this.src='../assets/images/placeholder.jpg'">
+                        </div>
+                        <div class="product-info">
+                            <h3>${product.name}</h3>
+                            <p class="product-description">${product.description || ''}</p>
+                            <p class="product-price">$${parseFloat(product.price || 0).toFixed(2)}</p>
+                            <button class="btn-add-to-cart">Add to Cart</button>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(productCard);
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Categories page DOMContentLoaded');
+            
+            // Load products from database API only
+            loadProducts();
+            
             // Initialize product modal if function exists
             if (typeof setupProductModal === 'function') {
                 setupProductModal();
@@ -120,11 +227,6 @@ if (!$dbConnected) {
             // Update cart icon if function exists
             if (typeof updateCartIcon === 'function') {
                 updateCartIcon();
-            }
-            
-            // Setup static product cards with event handlers
-            if (typeof setupStaticProductCards === 'function') {
-                setupStaticProductCards();
             }
         });
     </script>

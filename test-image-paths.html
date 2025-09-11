@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Path Test</title>
+    <style>
+        img { max-width: 200px; margin: 10px; border: 1px solid #ccc; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Image Path Test</h1>
+    
+    <div class="test-section">
+        <h2>Test from Root Directory</h2>
+        <p>Testing access to uploads and assets from root level:</p>
+        <img src="uploads/WhatsApp_Image_2025-09-04_at_14_38_06_4840e823_1757575559.jpg" alt="Upload test from root">
+        <img src="src/assets/images/k1.jpg" alt="Asset test from root">
+    </div>
+    
+    <div class="test-section">
+        <h2>Test from Pages Directory Perspective</h2>
+        <p>Testing access as if from src/pages/ directory:</p>
+        <img src="../uploads/WhatsApp_Image_2025-09-04_at_14_38_06_4840e823_1757575559.jpg" alt="Upload test from pages">
+        <img src="../assets/images/k1.jpg" alt="Asset test from pages">
+    </div>
+    
+    <div class="test-section">
+        <h2>Test from Admin Directory Perspective</h2>
+        <p>Testing access as if from src/admin/ directory:</p>
+        <img src="../uploads/WhatsApp_Image_2025-09-04_at_14_38_06_4840e823_1757575559.jpg" alt="Upload test from admin">
+        <img src="../assets/images/k1.jpg" alt="Asset test from admin">
+    </div>
+</body>
+</html>

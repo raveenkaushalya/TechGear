@@ -1,32 +1,33 @@
 // Combined application logic for TechGear Shop
 // -------------------------------- Products Data --------------------------------
-const products = [
-    { id: 'k1', name: 'Mechanical Keyboard', description: 'RGB Backlit Mechanical Gaming Keyboard with Blue Switches', price: 89.99, image: '../assets/images/k1.jpg', category: 'keyboards', featured: true },
-    { id: 'k2', name: 'Wireless Mechanical Keyboard', description: 'Low-latency Wireless Mechanical Keyboard with Brown Switches', price: 129.99, image: '../assets/images/k2.jpg', category: 'keyboards' },
-    { id: 'k3', name: 'Compact 60% Keyboard', description: 'Compact 60% Layout Mechanical Keyboard with PBT Keycaps', price: 79.99, image: '../assets/images/k3.jpg', category: 'keyboards' },
-    { id: 'k4', name: 'Premium Mechanical Keyboard', description: 'Premium Aluminum Frame Keyboard with Hot-swappable Switches', price: 149.99, image: '../assets/images/k4.jpg', category: 'keyboards' },
-    { id: 'k5', name: 'Silent Mechanical Keyboard', description: 'Ultra-quiet Mechanical Keyboard for Office and Gaming', price: 99.99, image: '../assets/images/k5.jpg', category: 'keyboards' },
-    { id: 'k7', name: 'Transformer Edition Keyboard', description: 'Exclusive Autobot-themed Mechanical Keyboard with Custom Keycaps - Perfect for Transformers fans!', price: 149.99, image: '../assets/images/k7-transformer.jpg', category: 'keyboards', featured: true, limited: true },
-    { id: 'm1', name: 'Cyberpunk Edition Mouse', description: 'Exclusive Cyberpunk RGB Wireless Gaming Mouse – Only while stocks last!', price: 129.99, image: '../assets/images/m1-cyberpunk.jpg', category: 'mice', featured: true, limited: true },
-    { id: 'm2', name: 'Wireless Gaming Mouse', description: 'Ultra-lightweight Wireless Gaming Mouse with 20,000 DPI Sensor', price: 69.99, image: '../assets/images/m2.jpg', category: 'mice' },
-    { id: 'm3', name: 'Ergonomic Mouse', description: 'Vertical Ergonomic Mouse for Reduced Wrist Strain', price: 49.99, image: '../assets/images/m3.jpg', category: 'mice' },
-    { id: 'm4', name: 'MMO Gaming Mouse', description: 'MMO Gaming Mouse with 12 Programmable Side Buttons', price: 79.99, image: '../assets/images/m4.jpg', category: 'mice' },
-    { id: 'm5', name: 'Premium Gaming Mouse', description: 'Ultralight Gaming Mouse with PTFE Feet and Paracord Cable', price: 89.99, image: '../assets/images/m5.jpg', category: 'mice' },
-    { id: 'm6', name: 'Classic Mouse', description: 'Reliable Wired Mouse for Everyday Use', price: 29.99, image: '../assets/images/m6.jpg', category: 'mice' },
-    { id: 'mn1', name: 'Samsung Odyssey G5', description: '32-inch QHD Curved Gaming Monitor with 165Hz Refresh Rate and 1ms Response Time', price: 349.99, image: '../assets/images/mn1.jpg?v=new', category: 'monitors', featured: true, limited: true },
-    { id: 'mn2', name: 'Ultrawide Monitor', description: '34-inch Curved Ultrawide Monitor with 21:9 Aspect Ratio', price: 449.99, image: '../assets/images/mn2.jpg', category: 'monitors' },
-    { id: 'mn3', name: '4K Professional Monitor', description: '32-inch 4K Professional Monitor with 99% Adobe RGB Coverage', price: 599.99, image: '../assets/images/mn3.jpg', category: 'monitors' },
-    { id: 'mn4', name: '240Hz Esports Monitor', description: '24.5-inch 1080p 240Hz TN Monitor for Competitive Gaming', price: 349.99, image: '../assets/images/mn4.jpg', category: 'monitors' },
-    { id: 'mn5', name: 'Budget Gaming Monitor', description: '24-inch 1080p 75Hz Monitor with FreeSync Technology', price: 179.99, image: '../assets/images/mn5.jpg', category: 'monitors' },
-    { id: 'h1', name: 'Wireless Gaming Headset', description: 'Low-latency Wireless Gaming Headset with 7.1 Surround Sound', price: 129.99, image: '../assets/images/h1.jpg', category: 'headphones', featured: true },
-    { id: 'h2', name: 'Studio Headphones', description: 'Professional Studio Monitoring Headphones with Flat Response', price: 149.99, image: '../assets/images/h2.jpg', category: 'headphones' },
-    { id: 'h3', name: 'Noise Cancelling Headphones', description: 'Wireless Noise Cancelling Headphones with 30-hour Battery Life', price: 199.99, image: '../assets/images/h3.jpg', category: 'headphones' },
-    { id: 'h4', name: 'Budget Gaming Headset', description: 'Affordable Gaming Headset with RGB Lighting and Microphone', price: 49.99, image: '../assets/images/h4.jpg', category: 'headphones' }
-];
+// Products will be loaded dynamically from the database API
+let products = [];
+
+// Function to load products from API
+async function fetchProductsFromAPI() {
+    try {
+        // Use absolute path to ensure it works from any page
+        const apiUrl = '/TechGear/src/admin/api/products.php?status=active';
+        
+        const response = await fetch(apiUrl);
+        
+        const json = await response.json();
+        
+        if (json.success) {
+            products = json.data || [];
+            return products;
+        } else {
+            console.error('API Error:', json.error);
+            return [];
+        }
+    } catch (error) {
+        console.error('Failed to fetch products:', error);
+        return [];
+    }
+}
 
 // ----------------------------- Components Loader -----------------------------
 function loadComponents() {
-    console.log("Loading components...");
     
     // Highlight active navigation link (for the embedded header)
     const current = window.location.pathname.split('/').pop();
@@ -44,7 +45,6 @@ function loadComponents() {
             return r.text();
         })
         .then(html => {
-            console.log("Product modal loaded successfully");
             const placeholder = document.getElementById('product-modal-placeholder');
             if (!placeholder) {
                 console.error("Product modal placeholder not found");
@@ -145,22 +145,54 @@ function createProductCard(p) {
     card.className = 'product-card';
     card.dataset.productId = p.id;
     if (p.limited) { card.classList.add('limited-edition'); }
+    
+    // Ensure price is a number
+    const price = parseFloat(p.price) || 0;
+    
+    // Handle different image path formats
+    let imageSrc = p.image || '';
+    if (imageSrc && !imageSrc.startsWith('http')) {
+        // Ensure relative paths work from pages directory
+        if (imageSrc.startsWith('assets/')) {
+            imageSrc = '../' + imageSrc;
+        } else if (imageSrc.startsWith('src/assets/')) {
+            imageSrc = imageSrc.replace('src/assets/', '../assets/');
+        } else if (imageSrc.startsWith('uploads/')) {
+            imageSrc = '../' + imageSrc;
+        }
+        // imageSrc already starting with ../ should work fine (this includes ../uploads/)
+    }
+    
     card.innerHTML = `
-        <div class="product-image"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>
+        <div class="product-image"><img src="${imageSrc}" alt="${p.name}" loading="lazy" onerror="this.src='../assets/images/placeholder.jpg'"></div>
         <div class="product-info">
             <h3>${p.name} ${p.limited ? '<span class="limited-edition-label">(Limited Edition)</span>' : ''}</h3>
-            <p class="product-description">${p.description}</p>
-            <p class="product-price">$${p.price.toFixed(2)}</p>
-            <button class="btn-add-to-cart" aria-label="Add ${p.name} to cart">Add to Cart</button>
+            <p class="product-description">${p.description || ''}</p>
+            <p class="product-price">$${price.toFixed(2)}</p>
+            <p class="product-stock">${p.quantity > 0 ? `In Stock: ${p.quantity}` : 'Out of Stock'}</p>
+            <button class="btn-add-to-cart" ${p.quantity <= 0 ? 'disabled' : ''} aria-label="Add ${p.name} to cart">
+                ${p.quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+            </button>
         </div>`;
+    
     // Only add click event for opening the modal, not for add-to-cart
     card.addEventListener('click', e => { 
         if (!e.target.classList.contains('btn-add-to-cart')) openProductModal(p); 
     });
+    
+    // Add event listener for add to cart button
+    card.querySelector('.btn-add-to-cart').addEventListener('click', e => {
+        e.stopPropagation();
+        addToCart(p.id, 1);
+    });
+    
     return card;
 }
 
-function loadProducts() {
+async function loadProducts() {
+    // First fetch products from API
+    await fetchProductsFromAPI();
+    
     const map = {
         featured: '.featured-products .product-grid',
         keyboards: '#keyboards .product-grid',
@@ -169,62 +201,37 @@ function loadProducts() {
         headphones: '#headphones .product-grid'
     };
     
+    // Clear existing content
+    Object.values(map).forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.innerHTML = '';
+        }
+    });
+    
+    // Load featured products if featured section exists
     if (document.querySelector(map.featured)) {
-        // Clear any existing products first
-        const featuredGrid = document.querySelector(map.featured);
-        featuredGrid.innerHTML = ''; // Remove all current products
-        
-        // Add a special class to the grid for centering
-        featuredGrid.classList.add('centered-featured-grid');
-        
-        // Arrange products with limited edition items in the spotlight
-        const featuredProducts = [
-            products.find(p => p.id === 'k7'), // Transformer Edition Keyboard (Limited Edition)
-            products.find(p => p.id === 'm1'), // Cyberpunk mouse (Limited Edition)
-            products.find(p => p.id === 'mn1')  // Samsung Odyssey G5 Monitor
-        ];
-        
-        featuredProducts.forEach((p, index) => {
-            if (!p) return;
-            
-            const card = createProductCard(p);
-            
-            // Add a special highlight class to all featured products
-            if (p.id === 'm1' || p.id === 'k7' || p.id === 'mn1') {
-                card.classList.add('featured-highlight');
-            }
-            
-            featuredGrid.appendChild(card);
+        // Since database products don't have featured flag, show first few products as featured
+        const featuredProducts = products.slice(0, 4);
+        featuredProducts.forEach(p => {
+            document.querySelector(map.featured).appendChild(createProductCard(p));
         });
     }
     
+    // Load products by category
     ['keyboards','mice','monitors','headphones'].forEach(cat => {
         const el = document.querySelector(map[cat]);
         if (el) {
-            products.filter(p => p.category === cat).forEach(p => el.appendChild(createProductCard(p)));
+            const categoryProducts = products.filter(p => p.category === cat);
+            categoryProducts.forEach(p => el.appendChild(createProductCard(p)));
         }
     });
 }
 
 function setupStaticProductCards() {
-    document.querySelectorAll('.product-card').forEach(card => {
-        if (card.getAttribute('data-listeners-added')) return;
-        const id = card.dataset.productId;
-        if (!id) return;
-        const product = products.find(p => p.id === id);
-        const data = product || (() => {
-            const name = card.querySelector('h3')?.textContent.trim();
-            const desc = card.querySelector('.product-description')?.textContent.trim();
-            const price = parseFloat(card.querySelector('.product-price')?.textContent.replace('$','') || '0');
-            const image = card.querySelector('.product-image img')?.src;
-            return { id, name, description: desc, price, image };
-        })();
-        // Only add click event for opening the modal, not for add-to-cart
-        card.addEventListener('click', e => { 
-            if (!e.target.classList.contains('btn-add-to-cart')) openProductModal(data); 
-        });
-        card.setAttribute('data-listeners-added', 'true');
-    });
+    // No longer setting up static product cards - only using database products
+    // This function is kept for backward compatibility but does nothing
+    return;
 }
 
 // ----------------------------- Cart Logic -----------------------------
@@ -252,15 +259,31 @@ function saveCart(c) {
 
 function addToCart(id, qty=1) {
     const c = getCart();
-    const p = products.find(p => p.id === id);
-    if (!p) return console.error('Product not found');
+    // Convert id to string for consistent comparison since database IDs are numeric
+    const productId = String(id);
+    const p = products.find(p => String(p.id) === productId);
+    if (!p) return console.error('Product not found:', id);
     
-    const existing = c.find(i => i.id === id);
+    // Check if product is in stock
+    if (p.quantity <= 0) {
+        showNotification(`${p.name} is out of stock!`, 'error');
+        return;
+    }
+    
+    const existing = c.find(i => String(i.id) === productId);
+    const currentCartQuantity = existing ? existing.quantity : 0;
+    
+    // Check if adding more would exceed available stock
+    if (currentCartQuantity + qty > p.quantity) {
+        showNotification(`Only ${p.quantity} ${p.name} available in stock!`, 'error');
+        return;
+    }
+    
     if (existing) {
         existing.quantity += qty;
     } else {
         c.push({ 
-            id, 
+            id: productId, 
             name: p.name, 
             price: p.price, 
             image: p.image, 
@@ -299,6 +322,60 @@ function showNotification(msg, type = "success") {
         note.classList.add('fade-out'); 
         setTimeout(() => note.remove(), 500); 
     }, 3000);
+}
+
+// Process checkout - update inventory and clear cart
+async function processCheckout() {
+    const cart = getCart();
+    
+    if (cart.length === 0) {
+        showNotification('Your cart is empty!', 'error');
+        return;
+    }
+    
+    let allSuccessful = true;
+    const errors = [];
+    
+    // Process each item in the cart
+    for (const item of cart) {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'purchase');
+            formData.append('id', item.id);
+            formData.append('quantity', item.quantity);
+            
+            const response = await fetch('/TechGear/src/admin/api/products.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                allSuccessful = false;
+                errors.push(`${item.name}: ${result.error}`);
+            }
+        } catch (error) {
+            allSuccessful = false;
+            errors.push(`${item.name}: Network error`);
+        }
+    }
+    
+    if (allSuccessful) {
+        // Clear cart and show success message
+        saveCart([]);
+        updateCartIcon();
+        showNotification('Purchase successful! Thank you for your order.');
+        
+        // Redirect to a success page or refresh the cart page
+        if (window.location.pathname.includes('cart.php')) {
+            renderCartPage();
+        }
+    } else {
+        // Show errors
+        const errorMessage = 'Some items could not be purchased:\n' + errors.join('\n');
+        showNotification(errorMessage, 'error');
+    }
 }
 
 // Cart page specific
@@ -457,7 +534,7 @@ function setupGlobalEventHandlers() {
                     }, 1500);
                 } else {
                     // User is logged in, proceed with checkout
-                    alert('Checkout functionality would be implemented here!');
+                    processCheckout();
                 }
             }
         });

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .product-card { border: 1px solid #ccc; margin: 10px; padding: 10px; display: inline-block; width: 200px; }
+        .product-image img { width: 100%; height: 150px; object-fit: cover; }
+        .product-price { font-weight: bold; color: #e74c3c; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Product API Test</h1>
+    
+    <div class="debug">
+        <h3>Debug Info:</h3>
+        <div id="debug-info"></div>
+    </div>
+    
+    <div id="products-container"></div>
+    
+    <script>
+        async function testAPI() {
+            const debugDiv = document.getElementById('debug-info');
+            const container = document.getElementById('products-container');
+            
+            try {
+                debugDiv.innerHTML = 'Fetching from API...';
+                
+                const response = await fetch('/TechGear/src/admin/api/products.php?status=active');
+                debugDiv.innerHTML += `<br>Response status: ${response.status}`;
+                
+                const json = await response.json();
+                debugDiv.innerHTML += `<br>Response data: ${JSON.stringify(json, null, 2)}`;
+                
+                if (json.success && json.data) {
+                    debugDiv.innerHTML += `<br>Found ${json.data.length} products`;
+                    
+                    // Group by category
+                    const categories = {};
+                    json.data.forEach(product => {
+                        if (!categories[product.category]) {
+                            categories[product.category] = [];
+                        }
+                        categories[product.category].push(product);
+                    });
+                    
+                    // Display by category
+                    Object.keys(categories).forEach(category => {
+                        const categoryDiv = document.createElement('div');
+                        categoryDiv.innerHTML = `<h2>${category.charAt(0).toUpperCase() + category.slice(1)} (${categories[category].length})</h2>`;
+                        
+                        const productsDiv = document.createElement('div');
+                        categories[category].forEach(product => {
+                            const card = document.createElement('div');
+                            card.className = 'product-card';
+                            
+                            // Handle image paths for test page (at root level)
+                            let imageSrc = product.image || '';
+                            if (imageSrc.startsWith('../')) {
+                                imageSrc = 'src/' + imageSrc.substring(3); // Convert ../assets to src/assets
+                            }
+                            
+                            card.innerHTML = `
+                                <div class="product-image">
+                                    <img src="${imageSrc}" alt="${product.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22><rect width=%22200%22 height=%22150%22 fill=%22%23ccc%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22>No Image</text></svg>'">
+                                </div>
+                                <h4>${product.name}</h4>
+                                <p>${product.description || 'No description'}</p>
+                                <div class="product-price">$${parseFloat(product.price || 0).toFixed(2)}</div>
+                                <small>ID: ${product.id} | Category: ${product.category} | Image: ${product.image}</small>
+                            `;
+                            productsDiv.appendChild(card);
+                        });
+                        
+                        categoryDiv.appendChild(productsDiv);
+                        container.appendChild(categoryDiv);
+                    });
+                } else {
+                    debugDiv.innerHTML += '<br>No products found or API error';
+                }
+                
+            } catch (error) {
+                debugDiv.innerHTML += `<br>Error: ${error.message}`;
+                console.error('Error:', error);
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>

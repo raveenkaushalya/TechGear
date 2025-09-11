@@ -169,7 +169,6 @@ function createProductCard(p) {
             <h3>${p.name} ${p.limited ? '<span class="limited-edition-label">(Limited Edition)</span>' : ''}</h3>
             <p class="product-description">${p.description || ''}</p>
             <p class="product-price">$${price.toFixed(2)}</p>
-            <p class="product-stock">${p.quantity > 0 ? `In Stock: ${p.quantity}` : 'Out of Stock'}</p>
             <button class="btn-add-to-cart" ${p.quantity <= 0 ? 'disabled' : ''} aria-label="Add ${p.name} to cart">
                 ${p.quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
             </button>
@@ -180,11 +179,7 @@ function createProductCard(p) {
         if (!e.target.classList.contains('btn-add-to-cart')) openProductModal(p); 
     });
     
-    // Add event listener for add to cart button
-    card.querySelector('.btn-add-to-cart').addEventListener('click', e => {
-        e.stopPropagation();
-        addToCart(p.id, 1);
-    });
+    // Note: Add to cart is handled by global event listener
     
     return card;
 }
@@ -201,8 +196,24 @@ async function loadProducts() {
         headphones: '#headphones .product-grid'
     };
     
+    // Also check for categories page structure with data-category attributes
+    const categoryMap = {
+        keyboards: '[data-category="keyboards"]',
+        mice: '[data-category="mice"]',
+        monitors: '[data-category="monitors"]',
+        headphones: '[data-category="headphones"]'
+    };
+    
     // Clear existing content
     Object.values(map).forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.innerHTML = '';
+        }
+    });
+    
+    // Clear categories page grids
+    Object.values(categoryMap).forEach(selector => {
         const element = document.querySelector(selector);
         if (element) {
             element.innerHTML = '';
@@ -218,12 +229,20 @@ async function loadProducts() {
         });
     }
     
-    // Load products by category
+    // Load products by category for both home page and categories page
     ['keyboards','mice','monitors','headphones'].forEach(cat => {
-        const el = document.querySelector(map[cat]);
-        if (el) {
-            const categoryProducts = products.filter(p => p.category === cat);
-            categoryProducts.forEach(p => el.appendChild(createProductCard(p)));
+        const categoryProducts = products.filter(p => p.category === cat);
+        
+        // Home page structure
+        const homeEl = document.querySelector(map[cat]);
+        if (homeEl) {
+            categoryProducts.forEach(p => homeEl.appendChild(createProductCard(p)));
+        }
+        
+        // Categories page structure
+        const categoryEl = document.querySelector(categoryMap[cat]);
+        if (categoryEl) {
+            categoryProducts.forEach(p => categoryEl.appendChild(createProductCard(p)));
         }
     });
 }

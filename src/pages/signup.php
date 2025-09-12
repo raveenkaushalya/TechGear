@@ -106,27 +106,170 @@
                 updateCartIcon();
             }
             
-            // Form validation
+            // Form validation and submission
             const signupForm = document.getElementById('signup-form');
             if (signupForm) {
                 signupForm.addEventListener('submit', function(event) {
-                    // Basic form validation
                     event.preventDefault();
                     
+                    // Get form data
+                    const formData = new FormData(signupForm);
                     const password = document.getElementById('password').value;
                     const confirmPassword = document.getElementById('confirm-password').value;
                     
+                    // Client-side validation
                     if (password !== confirmPassword) {
-                        alert('Passwords do not match!');
+                        showNotification('Passwords do not match!', 'error');
                         return;
                     }
                     
-                    // Display a message or redirect
-                    alert('Sign up functionality will be implemented soon!');
+                    if (password.length < 8) {
+                        showNotification('Password must be at least 8 characters long!', 'error');
+                        return;
+                    }
                     
-                    // Simulate successful signup and redirect (remove this when backend is implemented)
-                    // window.location.href = 'login.php';
+                    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+                        showNotification('Password must contain both letters and numbers!', 'error');
+                        return;
+                    }
+                    
+                    // Disable submit button to prevent double submission
+                    const submitBtn = signupForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Creating Account...';
+                    
+                    // Submit form via AJAX
+                    fetch('signup_process.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            
+                            // Redirect after successful signup
+                            setTimeout(() => {
+                                window.location.href = data.data.redirect || '/TechGear/index.php';
+                            }, 1500);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('An error occurred. Please try again.', 'error');
+                    })
+                    .finally(() => {
+                        // Re-enable submit button
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    });
                 });
+            }
+            
+            // Notification function
+            function showNotification(message, type = 'info') {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notification => notification.remove());
+                
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#007bff'};
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    z-index: 10000;
+                    max-width: 400px;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+                
+                // Add CSS animations if not already added
+                if (!document.getElementById('notification-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'notification-styles';
+                    style.textContent = `
+                        @keyframes slideIn {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+            
+            // Real-time password validation
+            const passwordField = document.getElementById('password');
+            const confirmPasswordField = document.getElementById('confirm-password');
+            
+            if (passwordField && confirmPasswordField) {
+                function validatePasswords() {
+                    const password = passwordField.value;
+                    const confirmPassword = confirmPasswordField.value;
+                    
+                    // Remove previous validation messages
+                    const existingMessages = document.querySelectorAll('.validation-message');
+                    existingMessages.forEach(msg => msg.remove());
+                    
+                    // Password strength validation
+                    if (password.length > 0 && password.length < 8) {
+                        addValidationMessage(passwordField, 'Password must be at least 8 characters long', 'error');
+                    } else if (password.length >= 8 && (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password))) {
+                        addValidationMessage(passwordField, 'Password must contain both letters and numbers', 'error');
+                    } else if (password.length >= 8) {
+                        addValidationMessage(passwordField, 'Password looks good!', 'success');
+                    }
+                    
+                    // Confirm password validation
+                    if (confirmPassword.length > 0 && password !== confirmPassword) {
+                        addValidationMessage(confirmPasswordField, 'Passwords do not match', 'error');
+                    } else if (confirmPassword.length > 0 && password === confirmPassword) {
+                        addValidationMessage(confirmPasswordField, 'Passwords match!', 'success');
+                    }
+                }
+                
+                function addValidationMessage(field, message, type) {
+                    const messageElement = document.createElement('small');
+                    messageElement.className = `validation-message validation-${type}`;
+                    messageElement.style.cssText = `
+                        display: block;
+                        margin-top: 5px;
+                        color: ${type === 'error' ? '#dc3545' : '#28a745'};
+                        font-size: 12px;
+                    `;
+                    messageElement.textContent = message;
+                    field.parentNode.parentNode.appendChild(messageElement);
+                }
+                
+                passwordField.addEventListener('input', validatePasswords);
+                confirmPasswordField.addEventListener('input', validatePasswords);
             }
         });
     </script>

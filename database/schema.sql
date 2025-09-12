@@ -4,6 +4,27 @@ CREATE DATABASE IF NOT EXISTS `techgear`
   COLLATE utf8mb4_unicode_ci;
 USE `techgear`;
 
+-- Users table for authentication and user management
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `email` VARCHAR(255) NOT NULL UNIQUE,
+  `fullname` VARCHAR(255) NOT NULL,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `status` ENUM('active','inactive','banned') NOT NULL DEFAULT 'active',
+  `email_verified` BOOLEAN NOT NULL DEFAULT FALSE,
+  `email_verification_token` VARCHAR(64) NULL,
+  `password_reset_token` VARCHAR(64) NULL,
+  `password_reset_expires` TIMESTAMP NULL,
+  `last_login` TIMESTAMP NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_username` (`username`),
+  KEY `idx_email` (`email`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- TechGear products table schema
 CREATE TABLE IF NOT EXISTS `products` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,

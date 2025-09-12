@@ -108,46 +108,145 @@
             setTimeout(function() {
                 document.getElementById('userLoginBox').classList.add('visible');
             }, 100);
+            
             // Update cart icon if function exists
             if (typeof updateCartIcon === 'function') {
                 updateCartIcon();
             }
-            // Form validation
+            
+            // Form validation and submission
             const loginForm = document.getElementById('login-form');
             if (loginForm) {
                 loginForm.addEventListener('submit', function(event) {
                     event.preventDefault();
-                    // Show loading overlay
-                    document.getElementById('loadingOverlay').classList.add('active');
-                    // Get the username value
-                    const username = document.getElementById('username').value;
+                    
+                    // Get form data
+                    const formData = new FormData(loginForm);
+                    const username = document.getElementById('username').value.trim();
+                    const password = document.getElementById('password').value;
+                    
+                    // Basic client-side validation
                     if (!username) {
-                        alert('Please enter a username');
-                        document.getElementById('loadingOverlay').classList.remove('active');
+                        showNotification('Please enter your username or email', 'error');
                         return;
                     }
-                    // Simulate login (in a real app this would validate against a database)
-                    if (typeof loginUser === 'function') {
-                        loginUser(username);
+                    
+                    if (!password) {
+                        showNotification('Please enter your password', 'error');
+                        return;
                     }
-                    // Display success message
-                    if (typeof showLoginNotification === 'function') {
-                        showLoginNotification('Login successful! Redirecting...', 'success');
-                    } else {
-                        alert('Login successful!');
-                    }
-                    // Check if we should redirect to checkout
-                    const checkoutRedirect = localStorage.getItem('checkoutRedirect');
-                    // Redirect after a short delay
-                    setTimeout(() => {
-                        if (checkoutRedirect) {
-                            localStorage.removeItem('checkoutRedirect'); // Clear the redirect
-                            window.location.href = checkoutRedirect;
+                    
+                    // Show loading overlay
+                    document.getElementById('loadingOverlay').classList.add('active');
+                    
+                    // Disable submit button to prevent double submission
+                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Logging in...';
+                    
+                    // Submit form via AJAX
+                    fetch('login_process.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Hide loading overlay
+                        document.getElementById('loadingOverlay').classList.remove('active');
+                        
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            
+                            // Update login state if functions exist
+                            if (typeof loginUser === 'function') {
+                                loginUser(data.data.username);
+                            }
+                            
+                            // Check if there's a checkout redirect from localStorage
+                            const checkoutRedirect = localStorage.getItem('checkoutRedirect');
+                            let redirectUrl = data.data.redirect || '/TechGear/index.php';
+                            
+                            if (checkoutRedirect) {
+                                localStorage.removeItem('checkoutRedirect');
+                                redirectUrl = checkoutRedirect;
+                            }
+                            
+                            // Redirect after successful login
+                            setTimeout(() => {
+                                window.location.href = redirectUrl;
+                            }, 1500);
                         } else {
-                            window.location.href = '/TechGear/index.php';
+                            showNotification(data.message, 'error');
                         }
-                    }, 1500);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loadingOverlay').classList.remove('active');
+                        showNotification('An error occurred during login. Please try again.', 'error');
+                    })
+                    .finally(() => {
+                        // Re-enable submit button
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    });
                 });
+            }
+            
+            // Notification function
+            function showNotification(message, type = 'info') {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(notification => notification.remove());
+                
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#007bff'};
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    z-index: 10000;
+                    max-width: 400px;
+                    animation: slideIn 0.3s ease-out;
+                `;
+                
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+                
+                // Add CSS animations if not already added
+                if (!document.getElementById('notification-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'notification-styles';
+                    style.textContent = `
+                        @keyframes slideIn {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
             }
         });
     </script>

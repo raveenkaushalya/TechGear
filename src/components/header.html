@@ -18,7 +18,29 @@
         </ul>
     </nav>
     <div class="user-actions">
-        <div class="login"><a href="/TechGear/src/pages/login.php"><i class="fas fa-user"></i> Login</a></div>
+        <!-- Logged out state - show login link -->
+        <div class="login-section" id="logged-out-section">
+            <div class="login">
+                <a href="/TechGear/src/pages/login.php" class="login-link">
+                    <i class="fas fa-user"></i> Login
+                </a>
+            </div>
+        </div>
+        
+        <!-- Logged in state - show user dropdown -->
+        <div class="user-section hidden" id="logged-in-section">
+            <div class="user-dropdown">
+                <a href="#" class="user-info-trigger">
+                    <i class="fas fa-user-circle"></i> 
+                    <span class="user-info" id="username-display">User</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </a>
+                <div class="user-dropdown-content">
+                    <a href="#" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+        
         <div class="cart"><a href="/TechGear/src/pages/cart.php"><i class="fas fa-shopping-cart"></i> Cart (0)</a></div>
     </div>
 </header>

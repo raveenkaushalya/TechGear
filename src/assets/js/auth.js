@@ -58,22 +58,30 @@ async function logoutUser() {
 
 // Function to update authentication UI elements
 function updateAuthUI(isLoggedIn, username = null, fullname = null) {
-    // Update navigation or user interface elements
-    const userElements = document.querySelectorAll('.user-info');
-    const loginLinks = document.querySelectorAll('.login-link');
-    const logoutLinks = document.querySelectorAll('.logout-link');
+    // Get the navbar sections
+    const loggedOutSection = document.getElementById('logged-out-section');
+    const loggedInSection = document.getElementById('logged-in-section');
+    const usernameDisplay = document.getElementById('username-display');
     
-    if (isLoggedIn) {
-        userElements.forEach(element => {
-            element.textContent = fullname || username || 'User';
-            element.style.display = 'block';
-        });
-        loginLinks.forEach(link => link.style.display = 'none');
-        logoutLinks.forEach(link => link.style.display = 'block');
+    if (isLoggedIn && username) {
+        // Show logged in state - hide login link, show username dropdown
+        if (loggedOutSection) {
+            loggedOutSection.classList.add('hidden');
+        }
+        if (loggedInSection) {
+            loggedInSection.classList.remove('hidden');
+        }
+        if (usernameDisplay) {
+            usernameDisplay.textContent = fullname || username;
+        }
     } else {
-        userElements.forEach(element => element.style.display = 'none');
-        loginLinks.forEach(link => link.style.display = 'block');
-        logoutLinks.forEach(link => link.style.display = 'none');
+        // Show logged out state - show login link, hide username dropdown
+        if (loggedOutSection) {
+            loggedOutSection.classList.remove('hidden');
+        }
+        if (loggedInSection) {
+            loggedInSection.classList.add('hidden');
+        }
     }
 }
 
@@ -144,12 +152,44 @@ function showLoginNotification(message, type = 'error') {
 
 // Initialize authentication state on page load
 document.addEventListener('DOMContentLoaded', async function() {
-    // Check authentication status and update UI
-    const loggedIn = await isUserLoggedIn();
-    const username = localStorage.getItem('username');
-    const fullname = localStorage.getItem('fullname');
-    
-    updateAuthUI(loggedIn, username, fullname);
+    try {
+        // Check authentication status from server
+        const response = await fetch('/TechGear/src/pages/check_auth.php');
+        const authData = await response.json();
+        
+        let loggedIn = false;
+        let username = null;
+        let fullname = null;
+        
+        if (authData.logged_in && authData.user_data) {
+            loggedIn = true;
+            username = authData.user_data.username;
+            fullname = authData.user_data.fullname;
+            
+            // Update localStorage for consistency
+            localStorage.setItem('userLoggedIn', 'true');
+            localStorage.setItem('username', username);
+            localStorage.setItem('fullname', fullname);
+        } else {
+            // Not logged in, clear localStorage
+            localStorage.removeItem('userLoggedIn');
+            localStorage.removeItem('username');
+            localStorage.removeItem('fullname');
+        }
+        
+        // Update the UI
+        updateAuthUI(loggedIn, username, fullname);
+        
+    } catch (error) {
+        console.error('Error checking authentication:', error);
+        
+        // Fallback to localStorage
+        const loggedIn = localStorage.getItem('userLoggedIn') === 'true';
+        const username = localStorage.getItem('username');
+        const fullname = localStorage.getItem('fullname');
+        
+        updateAuthUI(loggedIn, username, fullname);
+    }
     
     // Set up logout handlers
     document.addEventListener('click', function(e) {

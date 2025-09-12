@@ -160,7 +160,7 @@
                             
                             // Update login state if functions exist
                             if (typeof loginUser === 'function') {
-                                loginUser(data.data.username);
+                                loginUser(data.data.username, data.data.fullname);
                             }
                             
                             // Check if there's a checkout redirect from localStorage

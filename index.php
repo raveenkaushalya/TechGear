@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="src/assets/css/user-actions.css">
     <link rel="stylesheet" href="src/assets/css/no-outline.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="src/assets/js/auth.js" defer></script>
     <script src="src/assets/js/app.js" defer></script>
 </head>
 <body>
@@ -66,6 +67,13 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Index page DOMContentLoaded');
             
+            // Check for redirect messages
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirected = urlParams.get('redirected');
+            if (redirected === 'already_logged_in') {
+                showNotification('You are already logged in!', 'info');
+            }
+            
             // Set flag to prevent app.js from loading products again
             window.productsLoadedByPage = true;
             
@@ -90,6 +98,44 @@
                 updateCartIcon();
             }
         });
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'info' ? '#17a2b8' : '#28a745'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 1000;
+                max-width: 300px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.style.opacity = '1';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>

@@ -66,3 +66,44 @@ INSERT INTO `products` (`name`, `description`, `price`, `image`, `category`, `st
 ('Noise Cancelling Headphones', 'Over-ear active noise cancelling headphones for immersive audio', 149.99, '../assets/images/h2.jpg', 'headphones', 'active'),
 ('Surround Sound Headset', '7.1 surround sound headset with detachable mic', 99.99, '../assets/images/h3.jpg', 'headphones', 'active'),
 ('Lightweight Esports Headset', 'Comfortable, lightweight headset tuned for esports', 79.99, '../assets/images/h4.jpg', 'headphones', 'active');
+
+-- Orders table for tracking customer orders
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `order_id` VARCHAR(20) NOT NULL UNIQUE,
+  `user_id` INT UNSIGNED NOT NULL,
+  `total_amount` DECIMAL(10,2) NOT NULL,
+  `payment_method` ENUM('visa','mastercard','paypal') NOT NULL,
+  `payment_status` ENUM('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+  `order_status` ENUM('pending','processing','shipped','delivered','cancelled') NOT NULL DEFAULT 'pending',
+  `billing_info` JSON NOT NULL,
+  `shipping_info` JSON NULL,
+  `payment_transaction_id` VARCHAR(255) NULL,
+  `notes` TEXT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_order_id` (`order_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_payment_status` (`payment_status`),
+  KEY `idx_order_status` (`order_status`),
+  KEY `idx_created_at` (`created_at`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Order items table for tracking individual items in orders
+CREATE TABLE IF NOT EXISTS `order_items` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `order_id` INT UNSIGNED NOT NULL,
+  `product_id` INT UNSIGNED NULL,
+  `product_name` VARCHAR(255) NOT NULL,
+  `product_price` DECIMAL(10,2) NOT NULL,
+  `quantity` INT UNSIGNED NOT NULL DEFAULT 1,
+  `subtotal` DECIMAL(10,2) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_order_id` (`order_id`),
+  KEY `idx_product_id` (`product_id`),
+  FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

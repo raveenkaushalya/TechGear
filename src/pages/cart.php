@@ -85,6 +85,19 @@
             document.querySelector('.continue-shopping').addEventListener('click', function() {
                 window.location.href = '/TechGear/src/pages/categories.php';
             });
+            
+            // Set up checkout button
+            document.querySelector('.checkout-btn').addEventListener('click', function() {
+                // Check if cart has items
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                if (cart.length === 0) {
+                    alert('Your cart is empty. Please add some items before proceeding to checkout.');
+                    return;
+                }
+                
+                // Redirect to payment page
+                window.location.href = '/TechGear/src/pages/payment.php';
+            });
         });
     </script>
 </body>

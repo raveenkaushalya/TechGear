@@ -1,5 +1,15 @@
 <?php
 // PHP Signup page
+
+// Start session and check if user is already logged in
+session_start();
+
+// If user is already logged in, redirect to index.php
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id'])) {
+    // Add a small delay and message for better UX
+    header('Location: /TechGear/index.php?already_logged_in=1');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
